@@ -27,6 +27,7 @@ async function run() {
     const userCollection = client.db("store-admin").collection("users");
     const productCollection = client.db("store-admin").collection("products");
     const orderCollection = client.db("store-admin").collection("orders");
+    const reviewCollection = client.db("store-admin").collection("reviews");
 
     /*-----------------------------------------------------------------------------
                        CREATE USER AND STORE IN DATABASE CODE
@@ -60,6 +61,12 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
+    // get all admin and super admin
+    app.get("/alladmin", async (req, res) => {
+      const query = { role: "admin" };
+      const result = await userCollection.find(query).toArray();
+      res.send(result);
+    });
     //get specific user
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
@@ -71,7 +78,7 @@ async function run() {
     app.get("/admin/:email", async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email: email });
-      const isAdmin = user?.role === "admin";
+      const isAdmin = user.role === "admin";
       res.send({ admin: isAdmin });
     });
 
@@ -90,8 +97,15 @@ async function run() {
 
     // add a new products
     app.post("/products", async (req, res) => {
-      const tool = req.body;
-      const result = await productCollection.insertOne(tool);
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // for all order
+    app.get("/orders", async (req, res) => {
+      const query = {};
+      const result = await orderCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -133,6 +147,33 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(filter);
+      res.send(result);
+    });
+    //this is for delete tool
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await productCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    //this is for review
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+    //get all reviews
+    app.get("/reviews", async (req, res) => {
+      const reviews = await reviewCollection.find().toArray();
+      const reverseReviews = reviews.reverse();
+      res.send(reverseReviews);
+    });
+    //manage reviews
+    app.delete("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await reviewCollection.deleteOne(filter);
       res.send(result);
     });
   } finally {
