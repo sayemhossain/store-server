@@ -28,6 +28,7 @@ async function run() {
     const productCollection = client.db("store-admin").collection("products");
     const orderCollection = client.db("store-admin").collection("orders");
     const reviewCollection = client.db("store-admin").collection("reviews");
+    const paymentCollection = client.db("store-admin").collection("payments");
 
     /*-----------------------------------------------------------------------------
                        CREATE USER AND STORE IN DATABASE CODE
@@ -122,6 +123,14 @@ async function run() {
       const orders = await orderCollection.find(query).toArray();
       return res.send(orders);
     });
+    // this is for payment
+    app.get("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const order = await orderCollection.findOne(query);
+      res.send(order);
+    });
+
     //update quantity after a order
     app.put("/products/:id", async (req, res) => {
       const id = req.params.id;
@@ -157,6 +166,27 @@ async function run() {
       res.send(result);
     });
 
+    //this is for payment
+    app.post("/payment", async (req, res) => {
+      const paymentData = req.body;
+      const result = await paymentCollection.insertOne(paymentData);
+      res.send(result);
+    });
+    //get id based payment
+    app.get("/payment/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await paymentCollection.findOne(filter);
+      res.send(result);
+    });
+    //get based on email
+    app.get("/payments/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { userEmail: email };
+      const productPayment = await paymentCollection.find(filter).toArray();
+      const result = productPayment.reverse();
+      res.send(result);
+    });
     //this is for review
     app.post("/reviews", async (req, res) => {
       const review = req.body;
