@@ -29,6 +29,8 @@ async function run() {
     const orderCollection = client.db("store-admin").collection("orders");
     const reviewCollection = client.db("store-admin").collection("reviews");
     const paymentCollection = client.db("store-admin").collection("payments");
+    const contactCollection = client.db("store-admin").collection("contacts");
+    const subcribeCollection = client.db("store-admin").collection("subcribes");
 
     /*-----------------------------------------------------------------------------
                        CREATE USER AND STORE IN DATABASE CODE
@@ -204,6 +206,31 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await reviewCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    //this is for review
+    app.post("/contact", async (req, res) => {
+      const contactData = req.body;
+      const result = await contactCollection.insertOne(contactData);
+      res.send(result);
+    });
+
+    //get all contact
+    app.get("/contact", async (req, res) => {
+      const result = await contactCollection.find().toArray();
+      res.send(result);
+    });
+    //this is for review
+    app.post("/subcribe", async (req, res) => {
+      const subcribeData = req.body;
+      const result = await subcribeCollection.insertOne(subcribeData);
+      res.send(result);
+    });
+
+    //get all contact
+    app.get("/subcribe", async (req, res) => {
+      const result = await subcribeCollection.find().toArray();
       res.send(result);
     });
   } finally {
